@@ -1,0 +1,5 @@
+pluginname=QuickScope
+pluginclassname=QuickscopePlugin
+origin=intelec
+version=1.0
+studipMinVersion=3.0
