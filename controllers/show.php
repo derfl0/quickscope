@@ -22,6 +22,7 @@ class ShowController extends StudipController {
     
     public function course_action($course_id) {
         $this->course = Course::find($course_id);
+        $this->sem = new Seminar($this->course);
     }
 
     // customized #url_for for plugins

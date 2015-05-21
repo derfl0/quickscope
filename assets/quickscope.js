@@ -1,11 +1,24 @@
 $(document).ready(function () {
-    $('a[href*="seminar_main.php"]').mouseenter(function (e) {
+    $('a[href*="seminar_main.php"], a[href*="dispatch.php/course/details"]').mouseenter(function (e) {
         var position = $(this).position();
         var width = $(this).width();
         var href = $(this).attr('href');
-        var begin = href.indexOf("auswahl=") + 8;
+        if (href.contains('seminar_main.php')) {
+            var begin = href.indexOf("auswahl=") + 8;
+        } else {
+            var begin = href.indexOf("sem_id=") + 7;
+        }
         var id = href.substr(begin, 32);
         var quickscope = $('div.quickscope[data-quickscope="' + id + '"]');
+
+        // Check if context menu exists
+        if ($('menu#menu-' + id).length <= 0) {
+            var icon = STUDIP.ASSETS_URL+"/images/icons/16/blue/door-enter.png";
+            var menu = $('<menu>', {id: 'menu-' + id, type: "context", class: "quickscope-contextmenu"});
+            menu.append($("<menuitem>", {label: "In Veranstaltung eintragen", icon: icon, onClick: ""}));
+            $(this).append(menu);
+            $(this).attr('contextmenu', 'menu-' + id);
+        }
 
         if (quickscope.length <= 0) {
             timeout = setTimeout(function () {
@@ -28,9 +41,8 @@ $(document).ready(function () {
         quickscope.fadeIn(300);
     });
 
-    $('a[href*="seminar_main.php"]').mouseleave(function (e) {
+    $('a[href*="seminar_main.php"], a[href*="dispatch.php/course/details"]').mouseleave(function (e) {
         clearTimeout(timeout);
         $('div.quickscope').fadeOut(300);
-        $('div.quickscope.not-loaded').hide();
     });
 });
