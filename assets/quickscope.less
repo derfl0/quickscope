@@ -6,25 +6,27 @@ div.quickscope {
         float: left;
         z-index: 4;
         padding: 2px;
+        margin: 4px;
         background-color: white;
-        border-color: @light-gray-color-40;
+        border-color: @content-color-40;
         border-style: solid;
         border-width: 1px;
     }
     div.quickscope_text {
-        h3 {
-            margin-top: 4px;
-        }
-        position: relative;
-        left: 30px;
-        top: 30px;
+        box-shadow: 4px 4px 4px @content-color-80;
         background-color: white;
         border-color: @content-color-80;
         border-style: solid;
         border-width: 1px;
         margin-left: 20px;
-        margin-top: 20px;
-        padding: 4px;
+        margin-top: 28px;
+        h3 {
+            margin: 0;
+            padding: 4px;
+            color: @base-color;
+            background-color: @content-color-20;
+
+        }
         p {
             margin: 1px;
         }
