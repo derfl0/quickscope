@@ -2,9 +2,14 @@ STUDIP.quickscope = {
     enrole: function (id) {
         STUDIP.Dialog.fromURL(STUDIP.URLHelper.getURL('dispatch.php/course/enrolment/apply/' + id));
         return false;
+    },
+    addvirtual: function (id) {
+        $.ajax({
+            url: STUDIP.URLHelper.getURL('dispatch.php/calendar/schedule/addvirtual/' + id)
+        });
+        return false;
     }
-}
-
+};
 $(document).ready(function () {
     $('a[href*="seminar_main.php"], a[href*="dispatch.php/course/details"]').mouseenter(function (e) {
         var position = $(this).position();
@@ -17,12 +22,17 @@ $(document).ready(function () {
         }
         var id = href.substr(begin, 32);
         var quickscope = $('div.quickscope[data-quickscope="' + id + '"]');
-
         // Check if context menu exists
         if ($('menu#menu-' + id).length <= 0) {
-            var icon = STUDIP.ASSETS_URL + "/images/icons/16/blue/door-enter.png";
             var menu = $('<menu>', {id: 'menu-' + id, type: "context", class: "quickscope-contextmenu"});
-            menu.append($("<menuitem>", {label: "In Veranstaltung eintragen", icon: icon, onClick: "return STUDIP.quickscope.enrole('" + id + "')"}));
+            menu.append($("<menuitem>", {label: "In Veranstaltung eintragen",
+                icon: STUDIP.ASSETS_URL + "/images/icons/16/blue/door-enter.png",
+                onClick: "return STUDIP.quickscope.enrole('" + id + "')"
+            }));
+            menu.append($("<menuitem>", {label: "Nur im Stundenplan vormerken",
+                icon: STUDIP.ASSETS_URL + "/images/icons/16/blue/info.png",
+                onClick: "return STUDIP.quickscope.addvirtual('" + id + "')"
+            }));
             $(this).append(menu);
             $(this).attr('contextmenu', 'menu-' + id);
         }
@@ -47,7 +57,6 @@ $(document).ready(function () {
         quickscope.css('top', position.top - quickscope.outerHeight(true) - 30);
         quickscope.fadeIn(300);
     });
-
     $('a[href*="seminar_main.php"], a[href*="dispatch.php/course/details"]').mouseleave(function (e) {
         clearTimeout(timeout);
         $('div.quickscope').fadeOut(300);
