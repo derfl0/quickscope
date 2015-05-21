@@ -1,3 +1,10 @@
+STUDIP.quickscope = {
+    enrole: function (id) {
+        STUDIP.Dialog.fromURL(STUDIP.URLHelper.getURL('dispatch.php/course/enrolment/apply/' + id));
+        return false;
+    }
+}
+
 $(document).ready(function () {
     $('a[href*="seminar_main.php"], a[href*="dispatch.php/course/details"]').mouseenter(function (e) {
         var position = $(this).position();
@@ -13,9 +20,9 @@ $(document).ready(function () {
 
         // Check if context menu exists
         if ($('menu#menu-' + id).length <= 0) {
-            var icon = STUDIP.ASSETS_URL+"/images/icons/16/blue/door-enter.png";
+            var icon = STUDIP.ASSETS_URL + "/images/icons/16/blue/door-enter.png";
             var menu = $('<menu>', {id: 'menu-' + id, type: "context", class: "quickscope-contextmenu"});
-            menu.append($("<menuitem>", {label: "In Veranstaltung eintragen", icon: icon, onClick: ""}));
+            menu.append($("<menuitem>", {label: "In Veranstaltung eintragen", icon: icon, onClick: "return STUDIP.quickscope.enrole('" + id + "')"}));
             $(this).append(menu);
             $(this).attr('contextmenu', 'menu-' + id);
         }

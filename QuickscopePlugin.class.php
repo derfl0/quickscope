@@ -15,6 +15,7 @@ class QuickscopePlugin extends StudIPPlugin implements SystemPlugin {
     public function __construct() {
         parent::__construct();
         PageLayout::addScript($this->getPluginURL().'/assets/quickscope.js');
+        PageLayout::addScript(Assets::javascript_path('enrolment.js'));
         self::addStylesheet('/assets/quickscope.less');
     }
 
