@@ -37,6 +37,10 @@ GROUP BY seminar_id");
         }
     }
 
+    public function user_action($username) {
+        $this->user = User::findByUsername($username);
+    }
+
     // customized #url_for for plugins
     function url_for($to) {
         $args = func_get_args();
