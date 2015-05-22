@@ -116,3 +116,6 @@ div.quickscope div.quickscope_text h3 {
 div.quickscope div.quickscope_text p {
   margin: 1px;
 }
+div.quickscope div.quickscope_text p.collisions {
+  color: #d60000;
+}
