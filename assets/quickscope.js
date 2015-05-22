@@ -21,7 +21,7 @@ STUDIP.quickscope = {
     }
 };
 $(document).ready(function () {
-    $('a[href*="seminar_main.php"], a[href*="dispatch.php/course/details"]').mouseenter(function (e) {
+    $('a[href*="seminar_main.php"],a[href*="details.php"], a[href*="dispatch.php/course/details"]').mouseenter(function (e) {
         var position = $(this).position();
         var width = $(this).width();
         var href = $(this).attr('href');
@@ -115,7 +115,7 @@ $(document).ready(function () {
         quickscope.fadeIn(300);
     });
 
-    $('a[href*="seminar_main.php"], a[href*="dispatch.php/course/details"], a[href*="dispatch.php/profile"]').mouseleave(function (e) {
+    $('a[href*="seminar_main.php"],a[href*="details.php"], a[href*="dispatch.php/course/details"], a[href*="dispatch.php/profile"]').mouseleave(function (e) {
         clearTimeout(timeout);
         $('div.quickscope').fadeOut(300);
     });
