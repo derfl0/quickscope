@@ -97,8 +97,8 @@ div.quickscope img.quickscope_avatar {
   border-color: #d0d7e3;
   border-style: solid;
   border-width: 1px;
-  max-height: 40px;
-  max-width: 40px;
+  max-height: 60px;
+  max-width: 60px;
 }
 div.quickscope div.quickscope_text {
   box-shadow: 4px 4px 4px #a1aec7;
