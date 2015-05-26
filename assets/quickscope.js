@@ -37,26 +37,47 @@ STUDIP.quickscope = {
                             $('div.quickscope[data-quickscope="' + id + '"]').append(text);
                             text.append($('<h3>', {html: data.header}));
 
-                            $.each(data.text, function (id, entry) {
-                                if ($.trim(entry) !== '') {
-                                    text.append($('<p>', {html: entry}));
-                                }
-                            });
+                            // Add texts
+                            if (data.text) {
+                                $.each(data.text, function (id, entry) {
+                                    if ($.trim(entry) !== '') {
+                                        text.append($('<p>', {html: entry}));
+                                    }
+                                });
+                            }
+
+                            // Add important texts
+                            if (data.important) {
+                                $.each(data.important, function (id, entry) {
+                                    if ($.trim(entry) !== '') {
+                                        text.append($('<p>', {class: 'important', html: entry}));
+                                    }
+                                });
+                            }
+
+                            // Add errors
+                            if (data.error) {
+                                $.each(data.error, function (id, entry) {
+                                    if ($.trim(entry) !== '') {
+                                        text.append($('<p>', {class: 'problem', html: entry}));
+                                    }
+                                });
+                            }
 
                             // Build menu
-                            if ($('menu#menu-' + id).length <= 0) {
+                            if ($('menu#menu-' + id).length <= 0 && data.action) {
                                 var contextmenu = $('<menu>', {id: 'menu-' + id, type: "context", class: "quickscope-contextmenu"});
                                 $('body').append(contextmenu);
 
                                 $.each(data.action, function (id, menu) {
                                     var appendix = "";
                                     if (menu.type) {
-                                        var appendix = ", \""+menu.type+"\"";
+                                        var appendix = ", \"" + menu.type + "\"";
                                     }
 
                                     var menuitem = $("<menuitem>", {label: menu.label,
                                         icon: menu.icon,
-                                        onClick: "return STUDIP.quickscope.contextmenu(\""+menu.url+"\""+appendix+")"
+                                        onClick: "return STUDIP.quickscope.contextmenu(\"" + menu.url + "\"" + appendix + ")"
                                     });
                                     contextmenu.append(menuitem);
 

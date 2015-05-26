@@ -39,26 +39,28 @@ GROUP BY seminar_id");
             $collisionStmt->execute(array(User::findCurrent()->id, $course_id));
             while ($data = $collisionStmt->fetch(PDO::FETCH_ASSOC)) {
                 $course = Course::import($data);
-                $result['text'][] = sprintf(_('%s Überschneidungen mit %s'), $data['collisions'], $course->getFullname());
+                $result['error'][] = sprintf(_('%s Überschneidungen mit %s'), $data['collisions'], $course->getFullname());
+            }
+
+            // Check if you are member
+            if ($semuser = $course->members->findOneBy('user_id', User::findCurrent()->id)) {
+                $result['important'][] = sprintf(_('Sie sind %s in dieser Veranstaltung'), get_title_for_status($semuser->status, 1));
+            } else {
+                $result['action'][] = array(
+                    'label' => _('In Veranstaltung eintragen'),
+                    'icon' => Assets::image_path('/images/icons/16/blue/door-enter.png'),
+                    'url' => URLHelper::getURL('dispatch.php/course/enrolment/apply/' . $course_id),
+                    'type' => 'dialog'
+                );
+
+                $result['action'][] = array(
+                    'label' => _('Im Stundenplan vormerken'),
+                    'icon' => Assets::image_path('/images/icons/16/blue/info.png'),
+                    'url' => URLHelper::getURL('dispatch.php/calendar/schedule/addvirtual/' . $course_id)
+                );
             }
         }
-
-        $result['action'][] = array(
-            'label' => _('In Veranstaltung eintragen'),
-            'icon' => Assets::image_path('/images/icons/16/blue/door-enter.png'),
-            'url' => URLHelper::getURL('dispatch.php/course/enrolment/apply/' . $course_id),
-            'type' => 'dialog'
-        );
-
-
-        $result['action'][] = array(
-            'label' => _('Im Stundenplan vormerken'),
-            'icon' => Assets::image_path('/images/icons/16/blue/info.png'),
-            'url' => URLHelper::getURL('dispatch.php/calendar/schedule/addvirtual/' . $course_id)
-        );
-
-
-
+        
         $this->render_json($result);
     }
 
