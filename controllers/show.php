@@ -19,8 +19,15 @@ class ShowController extends StudipController {
     }
 
     public function course_action($course_id) {
-        $this->course = Course::find($course_id);
-        $this->sem = new Seminar($this->course);
+        $course = Course::find($course_id);
+        $sem = new Seminar($course);
+
+        $result['avatar'] = CourseAvatar::getAvatar($course->id)->getURL(Avatar::MEDIUM);
+        $result['header'] = $course->getFullname();
+        $result['text'][] = join(', ', array_map(function($obj) {
+                    return $obj->user->getFullname();
+                }, $course->getMembersWithStatus('dozent')));
+        $result['text'][] = $sem->getDatesHTML();
 
         // check if we are in that course otherwise query collisions
         if (!CourseMember::exists($course_id, User::findCurrent()->id)) {
@@ -32,13 +39,49 @@ GROUP BY seminar_id");
             $collisionStmt->execute(array(User::findCurrent()->id, $course_id));
             while ($data = $collisionStmt->fetch(PDO::FETCH_ASSOC)) {
                 $course = Course::import($data);
-                $this->collisions[$course->getFullname()] = $data['collisions'];
+                $result['text'][] = sprintf(_('%s Überschneidungen mit %s'), $data['collisions'], $course->getFullname());
             }
         }
+
+        $result['action'][] = array(
+            'label' => _('In Veranstaltung eintragen'),
+            'icon' => Assets::image_path('/images/icons/16/blue/door-enter.png'),
+            'url' => URLHelper::getURL('dispatch.php/course/enrolment/apply/' . $course_id),
+            'type' => 'dialog'
+        );
+
+
+        $result['action'][] = array(
+            'label' => _('Im Stundenplan vormerken'),
+            'icon' => Assets::image_path('/images/icons/16/blue/info.png'),
+            'url' => URLHelper::getURL('dispatch.php/calendar/schedule/addvirtual/' . $course_id)
+        );
+
+
+
+        $this->render_json($result);
     }
 
     public function user_action($username) {
-        $this->user = User::findByUsername($username);
+        $user = User::findByUsername($username);
+        $result['avatar'] = Avatar::getAvatar($user->id)->getURL(Avatar::MEDIUM);
+        $result['header'] = $user->getFullName();
+        $result['text'][] = $user->motto;
+        $result['text'][] = $user->Email;
+        $result['action'][] = array(
+            'label' => _('Kontakt hinzufügen'),
+            'icon' => Assets::image_path('/images/icons/16/blue/person.png'),
+            'url' => URLHelper::getURL('dispatch.php/profile/add_buddy', array('username' => $username))
+        );
+
+        $result['action'][] = array(
+            'label' => _('Studip Nachricht'),
+            'icon' => Assets::image_path('/images/icons/16/blue/mail.png'),
+            'url' => URLHelper::getURL('dispatch.php/messages/write', array('username' => $username, 'rec_uname' => $username)),
+            'type' => 'dialog'
+        );
+
+        $this->render_json($result);
     }
 
     // customized #url_for for plugins

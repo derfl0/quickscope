@@ -1,122 +1,106 @@
 STUDIP.quickscope = {
-    enrole: function (id) {
-        STUDIP.Dialog.fromURL(STUDIP.URLHelper.getURL('dispatch.php/course/enrolment/apply/' + id));
-        return false;
-    },
-    addvirtual: function (id) {
-        $.ajax({
-            url: STUDIP.URLHelper.getURL('dispatch.php/calendar/schedule/addvirtual/' + id)
+    hooks: [
+        {type: 'user', searchstring: 'dispatch.php/profile', idregex: /username=(.[^\&]*)/i},
+        {type: 'course', searchstring: 'seminar_main.php', idregex: /auswahl=(.[^\&]*)/i},
+        {type: 'course', searchstring: 'details.php', idregex: /sem_id=(.[^\&]*)/i},
+        {type: 'course', searchstring: 'dispatch.php/course/details', idregex: /sem_id=(.[^\&]*)/i}
+    ],
+    init: function () {
+        $.each(STUDIP.quickscope.hooks, function (id, hook) {
+            STUDIP.quickscope.register(hook.type, hook.searchstring, hook.idregex);
         });
-        return false;
     },
-    addcontact: function (id) {
-        $.ajax({
-            url: STUDIP.URLHelper.getURL('dispatch.php/profile/add_buddy?username=' + id)
+    register: function (type, searchstring, idregex) {
+        $('a[href*="' + searchstring + '"]').mouseenter(function (e) {
+            var self = $(this);
+            var position = $(this).position();
+            var width = $(this).width();
+            var href = $(this).attr('href');
+            var idmatch = href.match(idregex);
+
+            if (idmatch.length >= 1) {
+                var id = href.match(idregex)[1];
+                var quickscope = $('div.quickscope[data-quickscope="' + id + '"]');
+                if (quickscope.length <= 0) {
+                    timeout = setTimeout(function () {
+                        var scope = $('<div>').addClass('quickscope').attr('data-quickscope', id);
+                        $('body').prepend(scope);
+                        $.ajax({
+                            url: STUDIP.URLHelper.getURL('plugins.php/QuickscopePlugin/show/' + type + '/' + id),
+                            method: "POST",
+                            dataType: 'json'
+                        }).done(function (data) {
+
+                            // Build quickscope
+                            $('div.quickscope[data-quickscope="' + id + '"]').append($('<img>', {class: 'quickscope_avatar', src: data.avatar}));
+                            var text = $('<div>', {class: 'quickscope_text'});
+                            $('div.quickscope[data-quickscope="' + id + '"]').append(text);
+                            text.append($('<h3>', {html: data.header}));
+
+                            $.each(data.text, function (id, entry) {
+                                if ($.trim(entry) !== '') {
+                                    text.append($('<p>', {html: entry}));
+                                }
+                            });
+
+                            // Build menu
+                            if ($('menu#menu-' + id).length <= 0) {
+                                var contextmenu = $('<menu>', {id: 'menu-' + id, type: "context", class: "quickscope-contextmenu"});
+                                $('body').append(contextmenu);
+
+                                $.each(data.action, function (id, menu) {
+                                    var appendix = "";
+                                    if (menu.type) {
+                                        var appendix = ", \""+menu.type+"\"";
+                                    }
+
+                                    var menuitem = $("<menuitem>", {label: menu.label,
+                                        icon: menu.icon,
+                                        onClick: "return STUDIP.quickscope.contextmenu(\""+menu.url+"\""+appendix+")"
+                                    });
+                                    contextmenu.append(menuitem);
+
+                                });
+                            }
+
+                            // Check if attr was already appended
+                            var attr = self.attr('contextmenu');
+                            if (typeof attr === typeof undefined || attr === false) {
+                                self.attr('contextmenu', 'menu-' + id);
+                            }
+
+                            // Make it appear
+                            quickscope = $('div.quickscope[data-quickscope="' + id + '"]');
+                            quickscope.css('left', position.left + (width / 2) - (quickscope.width() / 2));
+                            quickscope.css('top', position.top - quickscope.outerHeight(true) - 30);
+                        });
+                    }, 300);
+                }
+                quickscope.css('left', position.left + (width / 2) - (quickscope.width() / 2));
+                quickscope.css('top', position.top - quickscope.outerHeight(true) - 30);
+                quickscope.fadeIn(300);
+            }
         });
-        return false;
+
+        // Mouseleave event
+        $('a[href*="' + searchstring + '"]').mouseleave(function (e) {
+            clearTimeout(timeout);
+            $('div.quickscope').fadeOut(300);
+        });
     },
-    message: function (id) {
-        STUDIP.Dialog.fromURL(STUDIP.URLHelper.getURL('dispatch.php/messages/write?username='+id+'&rec_uname=' + id));
+    contextmenu: function (url, type) {
+        switch (type) {
+            case 'dialog':
+                STUDIP.Dialog.fromURL(url);
+                break;
+            default:
+                $.ajax({
+                    url: STUDIP.URLHelper.getURL(url)
+                });
+        }
         return false;
     }
 };
 $(document).ready(function () {
-    $('a[href*="seminar_main.php"],a[href*="details.php"], a[href*="dispatch.php/course/details"]').mouseenter(function (e) {
-        var position = $(this).position();
-        var width = $(this).width();
-        var href = $(this).attr('href');
-        if (href.contains('seminar_main.php')) {
-            var begin = href.indexOf("auswahl=") + 8;
-        } else {
-            var begin = href.indexOf("sem_id=") + 7;
-        }
-        var id = href.substr(begin, 32);
-        var quickscope = $('div.quickscope[data-quickscope="' + id + '"]');
-        // Check if context menu exists
-        if ($('menu#menu-' + id).length <= 0) {
-            var menu = $('<menu>', {id: 'menu-' + id, type: "context", class: "quickscope-contextmenu"});
-            menu.append($("<menuitem>", {label: "In Veranstaltung eintragen",
-                icon: STUDIP.ASSETS_URL + "/images/icons/16/blue/door-enter.png",
-                onClick: "return STUDIP.quickscope.enrole('" + id + "')"
-            }));
-            menu.append($("<menuitem>", {label: "Nur im Stundenplan vormerken",
-                icon: STUDIP.ASSETS_URL + "/images/icons/16/blue/info.png",
-                onClick: "return STUDIP.quickscope.addvirtual('" + id + "')"
-            }));
-            $(this).append(menu);
-            $(this).attr('contextmenu', 'menu-' + id);
-        }
-
-        if (quickscope.length <= 0) {
-            timeout = setTimeout(function () {
-                var scope = $('<div>').addClass('quickscope').attr('data-quickscope', id);
-                $('body').prepend(scope);
-                $.ajax({
-                    url: STUDIP.URLHelper.getURL('plugins.php/QuickscopePlugin/show/course/' + id),
-                    method: "POST",
-                    dataType: 'html'
-                }).done(function (data) {
-                    $('div.quickscope[data-quickscope="' + id + '"]').html(data);
-                    quickscope = $('div.quickscope[data-quickscope="' + id + '"]');
-                    quickscope.css('left', position.left + (width / 2) - (quickscope.width() / 2));
-                    quickscope.css('top', position.top - quickscope.outerHeight(true) - 30);
-                });
-            }, 300);
-        }
-        quickscope.css('left', position.left + (width / 2) - (quickscope.width() / 2));
-        quickscope.css('top', position.top - quickscope.outerHeight(true) - 30);
-        quickscope.fadeIn(300);
-    });
-
-    $('a[href*="dispatch.php/profile"]').mouseenter(function (e) {
-        var position = $(this).position();
-        var width = $(this).width();
-        var href = $(this).attr('href');
-        var id = href.match(/username=(.*)\&?/i)[1];
-        var quickscope = $('div.quickscope[data-quickscope="' + id + '"]');
-        // Check if context menu exists
-        if ($('menu#menu-' + id).length <= 0) {
-            var menu = $('<menu>', {id: 'menu-' + id, type: "context", class: "quickscope-contextmenu"});
-            menu.append($("<menuitem>", {label: "Kontakt hinzufügen",
-                icon: STUDIP.ASSETS_URL + "/images/icons/16/blue/person.png",
-                onClick: "return STUDIP.quickscope.addcontact('" + id + "')"
-            }));
-            menu.append($("<menuitem>", {label: "Studip Nachricht",
-                icon: STUDIP.ASSETS_URL + "/images/icons/16/blue/mail.png",
-                onClick: "return STUDIP.quickscope.message('" + id + "')"
-            }));
-            $(this).append(menu);
-        }
-
-        // Check if attr was already appended
-        var attr = $(this).attr('contextmenu');
-        if (typeof attr === typeof undefined || attr === false) {
-            $(this).attr('contextmenu', 'menu-' + id);
-        }
-
-        if (quickscope.length <= 0) {
-            timeout = setTimeout(function () {
-                var scope = $('<div>').addClass('quickscope').attr('data-quickscope', id);
-                $('body').prepend(scope);
-                $.ajax({
-                    url: STUDIP.URLHelper.getURL('plugins.php/QuickscopePlugin/show/user/' + id),
-                    method: "POST",
-                    dataType: 'html'
-                }).done(function (data) {
-                    $('div.quickscope[data-quickscope="' + id + '"]').html(data);
-                    quickscope = $('div.quickscope[data-quickscope="' + id + '"]');
-                    quickscope.css('left', position.left + (width / 2) - (quickscope.width() / 2));
-                    quickscope.css('top', position.top - quickscope.outerHeight(true) - 30);
-                });
-            }, 300);
-        }
-        quickscope.css('left', position.left + (width / 2) - (quickscope.width() / 2));
-        quickscope.css('top', position.top - quickscope.outerHeight(true) - 30);
-        quickscope.fadeIn(300);
-    });
-
-    $('a[href*="seminar_main.php"],a[href*="details.php"], a[href*="dispatch.php/course/details"], a[href*="dispatch.php/profile"]').mouseleave(function (e) {
-        clearTimeout(timeout);
-        $('div.quickscope').fadeOut(300);
-    });
+    STUDIP.quickscope.init();
 });
