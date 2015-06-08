@@ -69,15 +69,16 @@ GROUP BY seminar_id");
         $result['avatar'] = Avatar::getAvatar($user->id)->getURL(Avatar::MEDIUM);
         $result['header'] = $user->getFullName();
         $result['text'][] = $user->motto;
-        $result['text'][] = $user->Email;
+        $result['text'][] = get_visible_email($user->id);
+        if (get_visibility_by_id($user->id) || $GLOBALS['perm']->have_perm('root')) {
+            $result['action'][] = array(
+                'label' => _('Kontakt hinzufügen'),
+                'icon' => Assets::image_path('/images/icons/16/blue/person.png'),
+                'url' => URLHelper::getURL('dispatch.php/profile/add_buddy', array('username' => $username))
+            );
+        }
         $result['action'][] = array(
-            'label' => _('Kontakt hinzufügen'),
-            'icon' => Assets::image_path('/images/icons/16/blue/person.png'),
-            'url' => URLHelper::getURL('dispatch.php/profile/add_buddy', array('username' => $username))
-        );
-
-        $result['action'][] = array(
-            'label' => _('Studip Nachricht'),
+            'label' => _('Stud.IP-Nachricht schicken'),
             'icon' => Assets::image_path('/images/icons/16/blue/mail.png'),
             'url' => URLHelper::getURL('dispatch.php/messages/write', array('username' => $username, 'rec_uname' => $username)),
             'type' => 'dialog'
