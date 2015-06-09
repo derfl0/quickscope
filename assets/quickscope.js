@@ -3,7 +3,8 @@ STUDIP.quickscope = {
         {type: 'user', searchstring: 'dispatch.php/profile', idregex: /username=(.[^\&]*)/i},
         {type: 'course', searchstring: 'seminar_main.php', idregex: /auswahl=(.[^\&]*)/i},
         {type: 'course', searchstring: 'details.php', idregex: /sem_id=(.[^\&]*)/i},
-        {type: 'course', searchstring: 'dispatch.php/course/details', idregex: /sem_id=(.[^\&]*)/i}
+        {type: 'course', searchstring: 'dispatch.php/course/details', idregex: /sem_id=(.[^\&]*)/i},
+        {type: 'course', searchstring: 'dispatch.php/course/overview', idregex: /sem_id=(.[^\&]*)/i}
     ],
     init: function () {
         $.each(STUDIP.quickscope.hooks, function (id, hook) {
