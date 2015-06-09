@@ -30,7 +30,8 @@ class ShowController extends StudipController {
         $result['text'][] = $sem->getDatesHTML();
 
         // check if we are in that course otherwise query collisions
-        if (!CourseMember::exists($course_id, User::findCurrent()->id)) {
+        $courseMember = CourseMember::findOneBySQL('seminar_id = ? AND user_id = ?', array($course_id, User::findCurrent()->id));
+        if (!$courseMember) {
             $collisionStmt = DBManager::get()->prepare("SELECT seminare.*, count(*) as collisions FROM seminare JOIN seminar_user USING (seminar_id) JOIN termine ON (termine.range_id = seminare.seminar_id) 
 JOIN termine compare ON ((termine.date + 1 BETWEEN compare.date AND compare.end_time) OR (termine.end_time - 1 BETWEEN compare.date AND compare.end_time)) 
 WHERE user_id = ? 
@@ -42,25 +43,22 @@ GROUP BY seminar_id");
                 $result['error'][] = sprintf(_('%s Überschneidungen mit %s'), $data['collisions'], $course->getFullname());
             }
 
-            // Check if you are member
-            if ($semuser = $course->members->findOneBy('user_id', User::findCurrent()->id)) {
-                $result['important'][] = sprintf(_('Sie sind %s in dieser Veranstaltung'), get_title_for_status($semuser->status, 1));
-            } else {
-                $result['action'][] = array(
-                    'label' => _('In Veranstaltung eintragen'),
-                    'icon' => Assets::image_path('/images/icons/16/blue/door-enter.png'),
-                    'url' => URLHelper::getURL('dispatch.php/course/enrolment/apply/' . $course_id),
-                    'type' => 'dialog'
-                );
+            $result['action'][] = array(
+                'label' => _('In Veranstaltung eintragen'),
+                'icon' => Assets::image_path('/images/icons/16/blue/door-enter.png'),
+                'url' => URLHelper::getURL('dispatch.php/course/enrolment/apply/' . $course_id),
+                'type' => 'dialog'
+            );
 
-                $result['action'][] = array(
-                    'label' => _('Im Stundenplan vormerken'),
-                    'icon' => Assets::image_path('/images/icons/16/blue/info.png'),
-                    'url' => URLHelper::getURL('dispatch.php/calendar/schedule/addvirtual/' . $course_id)
-                );
-            }
+            $result['action'][] = array(
+                'label' => _('Im Stundenplan vormerken'),
+                'icon' => Assets::image_path('/images/icons/16/blue/info.png'),
+                'url' => URLHelper::getURL('dispatch.php/calendar/schedule/addvirtual/' . $course_id)
+            );
+        } else {
+            $result['important'][] = sprintf(_('Sie sind %s in dieser Veranstaltung'), get_title_for_status($courseMember->status, 1));
         }
-        
+
         $this->render_json($result);
     }
 
