@@ -6,20 +6,30 @@ STUDIP.quickscope = {
         {type: 'course', searchstring: 'dispatch.php/course/details', idregex: /sem_id=(.[^\&]*)/i},
         {type: 'course', searchstring: 'dispatch.php/course/overview', idregex: /cid=(.[^\&]*)/i}
     ],
+    blacklist: ['ul#tabs'],
     init: function () {
         $.each(STUDIP.quickscope.hooks, function (id, hook) {
             STUDIP.quickscope.register(hook.type, hook.searchstring, hook.idregex);
         });
     },
     register: function (type, searchstring, idregex) {
-        $('a[href*="' + searchstring + '"]').mouseenter(function (e) {
+        $('a[href*="' + searchstring + '"]').filter(function () {
+            var link = $(this);
+            var result = true;
+            $.each(STUDIP.quickscope.blacklist, function (index, value) {
+                if ($(link).parents(value).length > 0) {
+                    result = false;
+                }
+            });
+            return result;
+        }).mouseenter(function (e) {
             var self = $(this);
             var position = $(this).position();
             var width = $(this).width();
             var href = $(this).attr('href');
             var idmatch = href.match(idregex);
 
-            if (idmatch.length >= 1) {
+            if (idmatch !== null && idmatch.length >= 1) {
                 var id = href.match(idregex)[1];
                 var quickscope = $('div.quickscope[data-quickscope="' + id + '"]');
                 if (quickscope.length <= 0) {
@@ -106,7 +116,9 @@ STUDIP.quickscope = {
 
         // Mouseleave event
         $('a[href*="' + searchstring + '"]').mouseleave(function (e) {
-            clearTimeout(timeout);
+            if (typeof timeout !== 'undefined') {
+                clearTimeout(timeout);
+            }
             $('div.quickscope').fadeOut(300);
         });
     },
