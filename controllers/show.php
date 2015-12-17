@@ -1,32 +1,37 @@
 <?php
 
-class ShowController extends StudipController {
+class ShowController extends StudipController
+{
 
-    public function __construct($dispatcher) {
+    public function __construct($dispatcher)
+    {
         parent::__construct($dispatcher);
         $this->plugin = $dispatcher->plugin;
     }
 
-    public function before_filter(&$action, &$args) {
+    public function before_filter(&$action, &$args)
+    {
         parent::before_filter($action, $args);
         $this->set_layout(null);
         $this->set_content_type('text/html;Charset=windows-1252');
         //$this->set_layout($GLOBALS['template_factory']->open('layouts/base_without_infobox'));
     }
 
-    public function index_action() {
+    public function index_action()
+    {
         $this->answer = 'Yes';
     }
 
-    public function course_action($course_id) {
+    public function course_action($course_id)
+    {
         $course = Course::find($course_id);
         $sem = new Seminar($course);
 
         $result['avatar'] = CourseAvatar::getAvatar($course->id)->getURL(Avatar::MEDIUM);
         $result['header'] = $course->getFullname();
-        $result['text'][] = join(', ', array_map(function($obj) {
-                    return $obj->user->getFullname();
-                }, $course->getMembersWithStatus('dozent')));
+        $result['text'][] = join(', ', array_map(function ($obj) {
+            return $obj->user->getFullname();
+        }, $course->getMembersWithStatus('dozent')));
         $result['text'][] = $sem->getDatesHTML();
 
         // check if we are in that course otherwise query collisions
@@ -62,7 +67,8 @@ GROUP BY seminar_id");
         $this->render_json($result);
     }
 
-    public function user_action($username) {
+    public function user_action($username)
+    {
         $user = User::findByUsername($username);
         $result['avatar'] = Avatar::getAvatar($user->id)->getURL(Avatar::MEDIUM);
         $result['header'] = $user->getFullName();
@@ -85,8 +91,44 @@ GROUP BY seminar_id");
         $this->render_json($result);
     }
 
+    public function file_action($file_id)
+    {
+        if (class_exists('imagick')) {
+            $file = StudipDocument::find($file_id);
+            $file->checkAccess($GLOBALS['user']->id);
+
+            // check cache
+            $cache = StudipCacheFactory::getCache();
+            $cachedIm = $cache->read('quickscope' . $file->id);
+
+            if (!$cachedIm) {
+                $filename = $GLOBALS['UPLOAD_PATH'] . '/' . substr($file->dokument_id, 0, 2) . '/' . $file->dokument_id;
+                try {
+                    $im = new imagick();
+                    $im->readImage($filename . '[0]');
+                    $im->setImageBackgroundColor('white');
+                    $im = $im->flattenImages();
+                    /* create the thumbnail */
+                    $im->setImageFormat('jpg');
+                    $im->setImageCompressionQuality(90);
+                    $im->scaleImage(250, 250, true);
+                    $imageTag = "<img src='data:image/jpg;base64," . base64_encode($im->getImageBlob()) . "' />";
+                    $cache->write('quickscope' . $file->id, $imageTag);
+                    $result['text'][] = $imageTag;
+
+                } catch (ImagickException $e) {
+
+                }
+            } else {
+                $result['text'][] = $cachedIm;
+            }
+        }
+        $this->render_json($result);
+    }
+
     // customized #url_for for plugins
-    function url_for($to) {
+    function url_for($to)
+    {
         $args = func_get_args();
 
         # find params

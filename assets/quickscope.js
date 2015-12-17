@@ -4,7 +4,8 @@ STUDIP.quickscope = {
         {type: 'course', searchstring: 'seminar_main.php', idregex: /auswahl=(.[^\&]*)/i},
         {type: 'course', searchstring: 'details.php', idregex: /sem_id=(.[^\&]*)/i},
         {type: 'course', searchstring: 'dispatch.php/course/details', idregex: /sem_id=(.[^\&]*)/i},
-        {type: 'course', searchstring: 'dispatch.php/course/overview', idregex: /cid=(.[^\&]*)/i}
+        {type: 'course', searchstring: 'dispatch.php/course/overview', idregex: /cid=(.[^\&]*)/i},
+        {type: 'file', searchstring: 'sendfile.php', idregex: /file_id=(.[^\&]*)/i}
     ],
     blacklist: ['ul#tabs'],
     init: function () {
@@ -13,21 +14,24 @@ STUDIP.quickscope = {
         });
     },
     register: function (type, searchstring, idregex) {
-        $('a[href*="' + searchstring + '"]').filter(function () {
-            var link = $(this);
-            var result = true;
-            $.each(STUDIP.quickscope.blacklist, function (index, value) {
-                if ($(link).parents(value).length > 0) {
-                    result = false;
-                }
-            });
-            return result;
-        }).mouseenter(function (e) {
+        $('body').on('mouseenter', 'a[href*="' + searchstring + '"]', function (e) {
             var self = $(this);
             var position = $(this).position();
             var width = $(this).width();
             var href = $(this).attr('href');
             var idmatch = href.match(idregex);
+            var blacklist;
+
+            // Apply blacklist
+            $.each(STUDIP.quickscope.blacklist, function (index, value) {
+                if (self.parents(value).length > 0) {
+                    blacklist = true;
+                }
+            });
+
+            if (blacklist) {
+                return false;
+            }
 
             if (idmatch !== null && idmatch.length >= 1) {
                 var id = href.match(idregex)[1];
@@ -42,11 +46,26 @@ STUDIP.quickscope = {
                             dataType: 'json'
                         }).done(function (data) {
 
+                            if (data === null) {
+                                return;
+                            }
+
                             // Build quickscope
-                            $('div.quickscope[data-quickscope="' + id + '"]').append($('<img>', {class: 'quickscope_avatar', src: data.avatar}));
-                            var text = $('<div>', {class: 'quickscope_text'});
+                            var quickscope = $('div.quickscope[data-quickscope="' + id + '"]');
+
+                            if (data.avatar) {
+                                quickscope.append($('<img>', {
+                                    class: 'quickscope_avatar',
+                                    src: data.avatar
+                                }));
+                            }
+
+                            text = $('<div>', {class: 'quickscope_text'});
                             $('div.quickscope[data-quickscope="' + id + '"]').append(text);
-                            text.append($('<h3>', {html: data.header}));
+
+                            if (data.header) {
+                                text.append($('<h3>', {html: data.header}));
+                            }
 
                             // Add texts
                             if (data.text) {
@@ -77,7 +96,11 @@ STUDIP.quickscope = {
 
                             // Build menu
                             if ($('menu#menu-' + id).length <= 0 && data.action) {
-                                var contextmenu = $('<menu>', {id: 'menu-' + id, type: "context", class: "quickscope-contextmenu"});
+                                var contextmenu = $('<menu>', {
+                                    id: 'menu-' + id,
+                                    type: "context",
+                                    class: "quickscope-contextmenu"
+                                });
                                 $('body').append(contextmenu);
 
                                 $.each(data.action, function (id, menu) {
@@ -86,7 +109,8 @@ STUDIP.quickscope = {
                                         var appendix = ", \"" + menu.type + "\"";
                                     }
 
-                                    var menuitem = $("<menuitem>", {label: menu.label,
+                                    var menuitem = $("<menuitem>", {
+                                        label: menu.label,
                                         icon: menu.icon,
                                         onClick: "return STUDIP.quickscope.contextmenu(\"" + menu.url + "\"" + appendix + ")"
                                     });
@@ -115,7 +139,7 @@ STUDIP.quickscope = {
         });
 
         // Mouseleave event
-        $('a[href*="' + searchstring + '"]').mouseleave(function (e) {
+        $('body').on('mouseleave', 'a[href*="' + searchstring + '"]', function (e) {
             if (typeof timeout !== 'undefined') {
                 clearTimeout(timeout);
             }
