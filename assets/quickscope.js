@@ -7,7 +7,7 @@ STUDIP.quickscope = {
         {type: 'course', searchstring: 'dispatch.php/course/overview', idregex: /cid=(.[^\&]*)/i},
         {type: 'file', searchstring: 'sendfile.php', idregex: /file_id=(.[^\&]*)/i}
     ],
-    blacklist: ['ul#tabs'],
+    blacklist: ['ul#tabs', 'div#my_seminars'],
     init: function () {
         $.each(STUDIP.quickscope.hooks, function (id, hook) {
             STUDIP.quickscope.register(hook.type, hook.searchstring, hook.idregex);
@@ -127,13 +127,13 @@ STUDIP.quickscope = {
 
                             // Make it appear
                             quickscope = $('div.quickscope[data-quickscope="' + id + '"]');
-                            quickscope.css('left', position.left + (width / 2) - (quickscope.width() / 2));
-                            quickscope.css('top', position.top - quickscope.outerHeight(true) - 30);
+                            quickscope.css('left',e.pageX - (quickscope.width() / 2));
+                            quickscope.css('top',e.pageY - quickscope.outerHeight(true) - 30);
                         });
                     }, 300);
                 }
-                quickscope.css('left', position.left + (width / 2) - (quickscope.width() / 2));
-                quickscope.css('top', position.top - quickscope.outerHeight(true) - 30);
+                quickscope.css('left', e.pageX - (quickscope.width() / 2));
+                quickscope.css('top', e.pageY - quickscope.outerHeight(true) - 30);
                 quickscope.fadeIn(300);
             }
         });
