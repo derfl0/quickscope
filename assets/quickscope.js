@@ -7,7 +7,7 @@ STUDIP.quickscope = {
         {type: 'course', searchstring: 'dispatch.php/course/overview', idregex: /cid=(.[^\&]*)/i},
         {type: 'file', searchstring: 'sendfile.php', idregex: /file_id=(.[^\&]*)/i}
     ],
-    blacklist: ['ul#tabs', 'div#my_seminars'],
+    blacklist: ['ul#tabs'],
     init: function () {
         $.each(STUDIP.quickscope.hooks, function (id, hook) {
             STUDIP.quickscope.register(hook.type, hook.searchstring, hook.idregex);
