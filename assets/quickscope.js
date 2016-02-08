@@ -127,14 +127,16 @@ STUDIP.quickscope = {
 
                             // Make it appear
                             quickscope = $('div.quickscope[data-quickscope="' + id + '"]');
-                            quickscope.css('left',e.pageX - (quickscope.width() / 2));
-                            quickscope.css('top',e.pageY - quickscope.outerHeight(true) - 30);
+                            quickscope.css('left', e.pageX - (quickscope.width() / 2));
+                            quickscope.css('top', e.pageY - quickscope.outerHeight(true) - 30);
+                            quickscope.fadeIn(300);
                         });
                     }, 300);
+                } else {
+                    quickscope.css('left', e.pageX - (quickscope.width() / 2));
+                    quickscope.css('top', e.pageY - quickscope.outerHeight(true) - 30);
+                    quickscope.fadeIn(300);
                 }
-                quickscope.css('left', e.pageX - (quickscope.width() / 2));
-                quickscope.css('top', e.pageY - quickscope.outerHeight(true) - 30);
-                quickscope.fadeIn(300);
             }
         });
 
