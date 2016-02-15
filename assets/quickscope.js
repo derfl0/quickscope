@@ -64,14 +64,14 @@ STUDIP.quickscope = {
                             $('div.quickscope[data-quickscope="' + id + '"]').append(text);
 
                             if (data.header) {
-                                text.append($('<h3>', {html: data.header}));
+                                text.append($('<h3>', {text: data.header}));
                             }
 
                             // Add texts
                             if (data.text) {
                                 $.each(data.text, function (id, entry) {
                                     if ($.trim(entry) !== '') {
-                                        text.append($('<p>', {html: entry}));
+                                        text.append($('<p>', {text: entry}));
                                     }
                                 });
                             }
@@ -80,7 +80,7 @@ STUDIP.quickscope = {
                             if (data.important) {
                                 $.each(data.important, function (id, entry) {
                                     if ($.trim(entry) !== '') {
-                                        text.append($('<p>', {class: 'important', html: entry}));
+                                        text.append($('<p>', {class: 'important', text: entry}));
                                     }
                                 });
                             }
@@ -89,7 +89,7 @@ STUDIP.quickscope = {
                             if (data.error) {
                                 $.each(data.error, function (id, entry) {
                                     if ($.trim(entry) !== '') {
-                                        text.append($('<p>', {class: 'problem', html: entry}));
+                                        text.append($('<p>', {class: 'problem', text: entry}));
                                     }
                                 });
                             }

@@ -86,6 +86,7 @@
 div.quickscope {
   position: absolute;
   z-index: 300000000;
+  max-width: 440px;
 }
 div.quickscope img.quickscope_avatar {
   position: relative;
