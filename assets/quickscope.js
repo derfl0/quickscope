@@ -71,7 +71,7 @@ STUDIP.quickscope = {
                             if (data.text) {
                                 $.each(data.text, function (id, entry) {
                                     if ($.trim(entry) !== '') {
-                                        text.append($('<p>', {text: entry}));
+                                        text.append($('<p>', {html: entry}));
                                     }
                                 });
                             }

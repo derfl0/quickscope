@@ -32,7 +32,7 @@ class ShowController extends StudipController
         $result['text'][] = join(', ', array_map(function ($obj) {
             return $obj->user->getFullname();
         }, $course->getMembersWithStatus('dozent')));
-        $result['text'][] = str_replace('<br>', '', $sem->getDatesHTML());
+        $result['text'][] = $sem->getDatesHTML();
 
         // check if we are in that course otherwise query collisions
         $courseMember = CourseMember::findOneBySQL('seminar_id = ? AND user_id = ?', array($course_id, User::findCurrent()->id));
