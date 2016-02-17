@@ -35,33 +35,38 @@ class ShowController extends StudipController
         $result['text'][] = $sem->getDatesHTML();
 
         // check if we are in that course otherwise query collisions
-        $courseMember = CourseMember::findOneBySQL('seminar_id = ? AND user_id = ?', array($course_id, User::findCurrent()->id));
-        if (!$courseMember && !isDeputy(User::findCurrent()->id, $course_id)) {
-            $collisionStmt = DBManager::get()->prepare("SELECT seminare.*, count(*) as collisions FROM seminare JOIN seminar_user USING (seminar_id) JOIN termine ON (termine.range_id = seminare.seminar_id) 
-JOIN termine compare ON ((termine.date + 1 BETWEEN compare.date AND compare.end_time) OR (termine.end_time - 1 BETWEEN compare.date AND compare.end_time)) 
-WHERE user_id = ? 
-AND compare.range_id = ? 
-GROUP BY seminar_id");
-            $collisionStmt->execute(array(User::findCurrent()->id, $course_id));
-            while ($data = $collisionStmt->fetch(PDO::FETCH_ASSOC)) {
-                $course = Course::import($data);
-                $result['error'][] = sprintf(_('%s Überschneidungen mit %s'), $data['collisions'], $course->getFullname());
+        if (!$GLOBALS['perm']->have_perm('admin')) {
+            $courseMember = CourseMember::findOneBySQL('seminar_id = ? AND user_id = ?', array($course_id, User::findCurrent()->id));
+            $deputy = isDeputy(User::findCurrent()->id, $course_id);
+            if (!$courseMember && !$deputy) {
+                $collisionStmt = DBManager::get()->prepare("SELECT seminare.*, count(*) as collisions FROM seminare JOIN seminar_user USING (seminar_id) JOIN termine ON (termine.range_id = seminare.seminar_id)
+    JOIN termine compare ON ((termine.date + 1 BETWEEN compare.date AND compare.end_time) OR (termine.end_time - 1 BETWEEN compare.date AND compare.end_time))
+    WHERE user_id = ?
+    AND compare.range_id = ?
+    GROUP BY seminar_id");
+                $collisionStmt->execute(array(User::findCurrent()->id, $course_id));
+                while ($data = $collisionStmt->fetch(PDO::FETCH_ASSOC)) {
+                    $course = Course::import($data);
+                    $result['error'][] = sprintf(_('%s ï¿½berschneidungen mit %s'), $data['collisions'], $course->getFullname());
+                }
+
+                $result['action'][] = array(
+                    'label' => _('In Veranstaltung eintragen'),
+                    'icon' => Assets::image_path('/images/icons/16/blue/door-enter.png'),
+                    'url' => URLHelper::getURL('dispatch.php/course/enrolment/apply/' . $course_id),
+                    'type' => 'dialog'
+                );
+
+                $result['action'][] = array(
+                    'label' => _('Im Stundenplan vormerken'),
+                    'icon' => Assets::image_path('/images/icons/16/blue/info.png'),
+                    'url' => URLHelper::getURL('dispatch.php/calendar/schedule/addvirtual/' . $course_id)
+                );
+            } else if ($deputy) {
+                $result['important'][] = sprintf(_('Sie sind Vertretung in dieser Veranstaltung.'));
+            } else {
+                $result['important'][] = sprintf(_('Sie sind %s in dieser Veranstaltung.'), get_title_for_status($courseMember->status, 1));
             }
-
-            $result['action'][] = array(
-                'label' => _('In Veranstaltung eintragen'),
-                'icon' => Assets::image_path('/images/icons/16/blue/door-enter.png'),
-                'url' => URLHelper::getURL('dispatch.php/course/enrolment/apply/' . $course_id),
-                'type' => 'dialog'
-            );
-
-            $result['action'][] = array(
-                'label' => _('Im Stundenplan vormerken'),
-                'icon' => Assets::image_path('/images/icons/16/blue/info.png'),
-                'url' => URLHelper::getURL('dispatch.php/calendar/schedule/addvirtual/' . $course_id)
-            );
-        } else {
-            $result['important'][] = sprintf(_('Sie sind %s in dieser Veranstaltung'), get_title_for_status($courseMember->status, 1));
         }
 
         $this->render_json($result);
@@ -76,7 +81,7 @@ GROUP BY seminar_id");
         $result['text'][] = get_visible_email($user->id);
         if (get_visibility_by_id($user->id) || $GLOBALS['perm']->have_perm('root')) {
             $result['action'][] = array(
-                'label' => _('Kontakt hinzufügen'),
+                'label' => _('Kontakt hinzufï¿½gen'),
                 'icon' => Assets::image_path('/images/icons/16/blue/person.png'),
                 'url' => URLHelper::getURL('dispatch.php/profile/add_buddy', array('username' => $username))
             );
