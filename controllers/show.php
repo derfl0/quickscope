@@ -39,7 +39,7 @@ class ShowController extends StudipController
             $courseMember = CourseMember::findOneBySQL('seminar_id = ? AND user_id = ?', array($course_id, User::findCurrent()->id));
             $deputy = isDeputy(User::findCurrent()->id, $course_id);
             if (!$courseMember && !$deputy) {
-                $collisionStmt = DBManager::get()->prepare("SELECT seminare.*, count(*) as collisions FROM seminare JOIN seminar_user USING (seminar_id) JOIN termine ON (termine.range_id = seminare.seminar_id)
+                $collisionStmt = DBManager::get()->prepare("SELECT seminare.*, count(seminare.`Seminar_id`) as collisions FROM seminare JOIN seminar_user USING (seminar_id) JOIN termine ON (termine.range_id = seminare.seminar_id)
     JOIN termine compare ON ((termine.date + 1 BETWEEN compare.date AND compare.end_time) OR (termine.end_time - 1 BETWEEN compare.date AND compare.end_time))
     WHERE user_id = ?
     AND compare.range_id = ?
