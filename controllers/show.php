@@ -47,7 +47,7 @@ class ShowController extends StudipController
                 $collisionStmt->execute(array(User::findCurrent()->id, $course_id));
                 while ($data = $collisionStmt->fetch(PDO::FETCH_ASSOC)) {
                     $course = Course::import($data);
-                    $result['error'][] = sprintf(_('%s Ãœberschneidungen mit %s'), $data['collisions'], $course->getFullname());
+                    $result['error'][] = sprintf(_('%s Überschneidungen mit %s'), $data['collisions'], $course->getFullname());
                 }
 
                 $result['action'][] = array(
@@ -81,7 +81,7 @@ class ShowController extends StudipController
         $result['text'][] = get_visible_email($user->id);
         if (get_visibility_by_id($user->id) || $GLOBALS['perm']->have_perm('root')) {
             $result['action'][] = array(
-                'label' => _('Kontakt hinzufÃ¼gen'),
+                'label' => _('Kontakt hinzufügen'),
                 'icon' => Assets::image_path('/images/icons/16/blue/person.png'),
                 'url' => URLHelper::getURL('dispatch.php/profile/add_buddy', array('username' => $username))
             );
