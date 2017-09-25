@@ -52,14 +52,14 @@ class ShowController extends StudipController
 
                 $result['action'][] = array(
                     'label' => _('In Veranstaltung eintragen'),
-                    'icon' => Assets::image_path('/images/icons/16/blue/door-enter.png'),
+                    'icon' => Icon::create('door-enter', 'clickable')->asImagePath(),
                     'url' => URLHelper::getURL('dispatch.php/course/enrolment/apply/' . $course_id),
                     'type' => 'dialog'
                 );
 
                 $result['action'][] = array(
                     'label' => _('Im Stundenplan vormerken'),
-                    'icon' => Assets::image_path('/images/icons/16/blue/info.png'),
+                    'icon' => Icon::create('info', 'clickable')->asImagePath(),
                     'url' => URLHelper::getURL('dispatch.php/calendar/schedule/addvirtual/' . $course_id)
                 );
             } else if ($deputy) {
@@ -82,13 +82,13 @@ class ShowController extends StudipController
         if (get_visibility_by_id($user->id) || $GLOBALS['perm']->have_perm('root')) {
             $result['action'][] = array(
                 'label' => _('Kontakt hinzufügen'),
-                'icon' => Assets::image_path('/images/icons/16/blue/person.png'),
+                'icon' => Icon::create('person', 'clickable')->asImagePath(),
                 'url' => URLHelper::getURL('dispatch.php/profile/add_buddy', array('username' => $username))
             );
         }
         $result['action'][] = array(
             'label' => _('Stud.IP-Nachricht schicken'),
-            'icon' => Assets::image_path('/images/icons/16/blue/mail.png'),
+            'icon' => Icon::create('mail', 'clickable')->asImagePath(),
             'url' => URLHelper::getURL('dispatch.php/messages/write', array('username' => $username, 'rec_uname' => $username)),
             'type' => 'dialog'
         );
