@@ -4,8 +4,8 @@ STUDIP.quickscope = {
         {type: 'course', searchstring: 'seminar_main.php', idregex: /auswahl=(.[^\&]*)/i},
         {type: 'course', searchstring: 'details.php', idregex: /sem_id=(.[^\&]*)/i},
         {type: 'course', searchstring: 'dispatch.php/course/details', idregex: /sem_id=(.[^\&]*)/i},
-        {type: 'course', searchstring: 'dispatch.php/course/overview', idregex: /cid=(.[^\&]*)/i},
-        {type: 'file', searchstring: 'sendfile.php', idregex: /file_id=(.[^\&]*)/i}
+        {type: 'course', searchstring: 'dispatch.php/course/overview', idregex: /cid=(.[^\&]*)/i}/*,
+        {type: 'file', searchstring: 'sendfile.php', idregex: /file_id=(.[^\&]*)/i}*/
     ],
     blacklist: ['ul#tabs'],
     init: function () {
