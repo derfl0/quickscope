@@ -1,0 +1,12 @@
+.idea
+.DS_Store
+._*
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+Thumbs.db
+ehthumbs.db
+ehthumbs_vista.db
+[Dd]esktop.ini
+$RECYCLE.BIN/
