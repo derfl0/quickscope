@@ -93,37 +93,6 @@ STUDIP.quickscope = {
                                 });
                             }
 
-                            // Build menu
-                            if ($('menu#menu-' + id).length <= 0 && data.action) {
-                                var contextmenu = $('<menu>', {
-                                    id: 'menu-' + id,
-                                    type: "context",
-                                    class: "quickscope-contextmenu"
-                                });
-                                $('body').append(contextmenu);
-
-                                $.each(data.action, function (id, menu) {
-                                    var appendix = "";
-                                    if (menu.type) {
-                                        var appendix = ", \"" + menu.type + "\"";
-                                    }
-
-                                    var menuitem = $("<menuitem>", {
-                                        label: menu.label,
-                                        icon: menu.icon,
-                                        onClick: "return STUDIP.quickscope.contextmenu(\"" + menu.url + "\"" + appendix + ")"
-                                    });
-                                    contextmenu.append(menuitem);
-
-                                });
-                            }
-
-                            // Check if attr was already appended
-                            var attr = self.attr('contextmenu');
-                            if (typeof attr === typeof undefined || attr === false) {
-                                self.attr('contextmenu', 'menu-' + id);
-                            }
-
                             // Make it appear
                             quickscope = $('div.quickscope[data-quickscope="' + id + '"]');
                             quickscope.css('left', e.pageX - (quickscope.width() / 2));
@@ -146,18 +115,6 @@ STUDIP.quickscope = {
             }
             $('div.quickscope').fadeOut(300);
         });
-    },
-    contextmenu: function (url, type) {
-        switch (type) {
-            case 'dialog':
-                STUDIP.Dialog.fromURL(url);
-                break;
-            default:
-                $.ajax({
-                    url: STUDIP.URLHelper.getURL(url)
-                });
-        }
-        return false;
     }
 };
 $(document).ready(function () {
