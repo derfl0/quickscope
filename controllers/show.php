@@ -30,7 +30,7 @@ class ShowController extends StudipController
         $result['text'][] = join(', ', array_map(function ($obj) {
             return $obj->user->getFullname();
         }, $course->getMembersWithStatus('dozent')));
-        $result['text'][] = $sem->getDatesHTML();
+        $result['text'][] = $sem->getDatesHTML(['show_room' => true]);
 
         // check if we are in that course otherwise query collisions
         if (!$GLOBALS['perm']->have_perm('admin')) {
